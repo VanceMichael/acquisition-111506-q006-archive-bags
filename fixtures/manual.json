@@ -1,0 +1,7 @@
+{
+  "bagId": "bag-manual",
+  "payloads": [
+    "data/catalog.txt"
+  ],
+  "verification": "operator-reviewed"
+}

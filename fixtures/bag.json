@@ -1,0 +1,17 @@
+{
+  "payloadManifest": "570c8523ddc7c2d921e741f062ae4539  data/catalog.txt\n3bf0bb246ede08db15a48a11e512b413  data/images/map.bin\ne9a88814fa815bdc34b084e8735420e5  data/audit.txt\n",
+  "tagManifests": [
+    "eaa2c609ff6371712f623f5531945b44  bagit.txt\n951113c123865eeacf53f0ab5c55bae8  bag-info.txt\n2ce8ad993d29bc4ae6bc9fec6c7382cd  tag-audit.txt\n",
+    "1712ecfb074bf29c4188ad3421032509159a09739fd604f8fe57038b4ddefcc9  bagit.txt\n62009fe4cb7e8ba46872c66c6471ae14c591961769abd367a312c5e9c78e1bfb  bag-info.txt\n29bbccdaaa0201176d3d01a3188a880b049b8e8d168fb05b2a71f547b41f6615  tag-audit.txt\n"
+  ],
+  "fetch": "sha256:72ef5c4f4fc297235f0d9dd1730b6833b7ad3de281d1013c0d3178f8b965e315  11  data%2Fimages%2Fmap.bin\n",
+  "inline": {
+    "data/catalog.txt": "catalogue\n",
+    "data/audit.txt": "audit\n"
+  },
+  "tagFiles": [
+    "bagit.txt",
+    "bag-info.txt",
+    "tag-audit.txt"
+  ]
+}
