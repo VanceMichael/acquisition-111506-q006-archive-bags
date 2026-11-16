@@ -1,10 +1,11 @@
 
+import { createHash } from 'node:crypto';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { startApplication } from '../src/server.mjs';
 import { startProvider } from '../provider/source.mjs';
-import { product } from '../src/domain.mjs';
+import { product, statusLabels } from '../src/domain.mjs';
 
 const directory = await mkdtemp(join(tmpdir(), 'intake-demo-'));
 const source = await startProvider();
@@ -24,7 +25,33 @@ try {
     if (!Buffer.from(evidence).equals(fixture)) throw new Error('原始依据不一致');
   }
   console.log('当前收件', await (await fetch(`${application.url}/api/records`)).text());
-  console.log('说明：当前运行展示人工收件；自动来源接入尚未提供。');
+
+  console.log('自动交接：薄袋补件与验收');
+  for (const label of ['首次补件', '同来源再次补件']) {
+    const response = await fetch(`${application.url}/api/collect`, { method: 'POST', body: JSON.stringify({ source: source.url }) });
+    const receipt = await response.json();
+    if (!response.ok) throw new Error(JSON.stringify(receipt));
+    console.log(label, JSON.stringify({
+      status: response.status,
+      key: receipt.key,
+      duplicate: receipt.duplicate,
+      验收: statusLabels[receipt.record.verification.status],
+      payload: receipt.record.verification.payload.status,
+      tag: receipt.record.verification.tag.status,
+      补件: receipt.record.automation.fetch,
+    }));
+  }
+  const status = await (await fetch(`${application.url}/api/bags/status?key=loan-17`)).json();
+  console.log('当前交接状态', JSON.stringify({ 状态: status.statusLabel, 依据清单: status.manifests.map(item => item.path) }));
+  const delivered = await (await fetch(`${application.url}/api/bags/files?key=loan-17`)).json();
+  console.log('已交付文件', JSON.stringify(delivered.files));
+  const fetched = await fetch(`${application.url}/api/bags/files?key=loan-17&path=${encodeURIComponent('data/images/map.bin')}`);
+  const fetchedBody = Buffer.from(await fetched.arrayBuffer());
+  console.log('正文回查', JSON.stringify({ path: 'data/images/map.bin', size: fetchedBody.length, sha256: createHash('sha256').update(fetchedBody).digest('hex') }));
+  const manifestRef = status.manifests.find(item => item.path === 'manifest-md5.txt');
+  const manifestText = await (await fetch(`${application.url}/api/evidence/${manifestRef.sha256}`)).text();
+  console.log('当时依据的清单可复核', JSON.stringify(manifestText.split('\n').filter(Boolean)));
+  console.log('说明：缺件、内容校验失败等异常状态由自动化测试覆盖（npm test）。');
 } finally {
   await application.close();
   await source.close();
